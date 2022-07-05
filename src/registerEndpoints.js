@@ -1,4 +1,8 @@
-const registerEndpoints = (app, endpoints) => {
+const registerEndpoints = ({
+  app,
+  endpoints,
+  isSite = true
+}) => {
   endpoints.forEach(endpoint => {
     const { isSecure, handler } = endpoint;
     let method = endpoint.method?.toLowerCase();
@@ -10,8 +14,8 @@ const registerEndpoints = (app, endpoints) => {
       method = parts[0].toLowerCase();
       path = parts[1];
     }
-    app[method.toLowerCase()](path, (req, res) => {
-      new handler({ req, res, isSecure });
+    app[method.toLowerCase()](path, (req, res, next) => {
+      isSite ? new handler({ req, res, isSecure }) : next();
     });
   });
 }

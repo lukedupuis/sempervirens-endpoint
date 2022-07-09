@@ -2,6 +2,8 @@
 
 Middleware for handling Express routes, it provides an organized way to register multiple Express endpoints, an extendable class for isolating endpoint functionality, standardization for sending success and error objects, and built-in authorization with minimal JWT configuration.
 
+![Tests badge](https://github.com/lukedupuis/sempervirens-endpoint/actions/workflows/main.yml/badge.svg?event=push) ![Version badge](https://img.shields.io/static/v1?label=Node.js&labelColor=30363c&message=16.x&color=blue)
+
 ## Installation
 
 `npm install @sempervirens/endpoint`

@@ -73,7 +73,7 @@ class Test5RequestHandler extends RequestHandler {
 
 const endpoints = [
   {
-    path: 'GET /api/test-1',
+    path: 'GET api/test-1',
     handler: Test1RequestHandler
   },
   {

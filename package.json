@@ -1,6 +1,6 @@
 {
   "name": "@sempervirens/endpoint",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Middleware for handling Express routes",
   "main": "index.js",
   "type": "module",

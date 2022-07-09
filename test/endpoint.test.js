@@ -104,8 +104,8 @@ describe('1. Endpoint', () => {
     // return;
     it('1.1.1. Should register the endpoints on the Express app', async () => {
       registerEndpoints({ app, endpoints });
-      http.createServer(app).listen(80);
-      const { text } = await superagent.get('http://localhost/api/test-1');
+      http.createServer(app).listen(8080);
+      const { text } = await superagent.get('http://localhost:8080/api/test-1');
       expect(text).to.equal('Success');
     });
   });
@@ -116,7 +116,7 @@ describe('1. Endpoint', () => {
     describe('1.2.1. When a response is returned with the Express response object send() function', () => {
       // return;
       it('1.2.1.1. Should return a text value', async () => {
-        const { text } = await superagent.get('http://localhost/api/test-1');
+        const { text } = await superagent.get('http://localhost:8080/api/test-1');
         expect(text).to.equal('Success');
       });
     });
@@ -124,7 +124,7 @@ describe('1. Endpoint', () => {
     describe('1.2.2. When a response is returned with the RequestHandler send function', () => {
       // return;
       it('1.2.2.1. Should take "message" and "data" and return a standardized JSON object as "body"', async () => {
-        const { body: { message, data, error } } = await superagent.get('http://localhost/api/test-2');
+        const { body: { message, data, error } } = await superagent.get('http://localhost:8080/api/test-2');
         expect(message).to.equal('Test 2 message');
         expect(data).to.deep.equal({ prop1: 'val1', prop2: 'val2' });
         expect(error).to.be.undefined;
@@ -138,7 +138,7 @@ describe('1. Endpoint', () => {
         // return;
         it('1.2.3.1.1 Should return a standardized JSON object as "body" with a generic error message', async () => {
           console.error = () => null;
-          const { body } = await superagent.get('http://localhost/api/test-3');
+          const { body } = await superagent.get('http://localhost:8080/api/test-3');
           expect(body).to.deep.equal({
             error: {
               number: 104020,
@@ -153,7 +153,7 @@ describe('1. Endpoint', () => {
         // return;
         it('1.2.3.2.1 Should return standardized JSON object as "body" with the error message', async () => {
           console.error = () => null;
-          const { body } = await superagent.get('http://localhost/api/test-4');
+          const { body } = await superagent.get('http://localhost:8080/api/test-4');
           expect(true).to.be.true;
           expect(body).to.deep.equal({
             error: {
@@ -176,7 +176,7 @@ describe('1. Endpoint', () => {
       // return;
       it('1.3.1.1. Should return 401 Unauthorized response', async () => {
         try {
-          await superagent.get('http://localhost/api/test-5');
+          await superagent.get('http://localhost:8080/api/test-5');
         } catch({ status, message }) {
           expect(status).to.equal(401);
           expect(message).to.equal('Unauthorized');
@@ -189,7 +189,7 @@ describe('1. Endpoint', () => {
       it('1.3.2.1. Should return 401 Unauthorized response', async () => {
         try {
           await superagent
-            .get('http://localhost/api/test-5')
+            .get('http://localhost:8080/api/test-5')
             .set('Authorization', 'Bearer token');
         } catch({ status, message }) {
           expect(status).to.equal(401);
@@ -203,7 +203,7 @@ describe('1. Endpoint', () => {
       it('1.3.3.1. Should return a standardized JSON object as "body"', async () => {
         const token = authorizer.encryptJwt({ expiresIn: '1m', data: { test: 1 } });
         const { body } = await superagent
-          .get('http://localhost/api/test-5')
+          .get('http://localhost:8080/api/test-5')
           .set('Authorization', `Bearer ${token}`);
         expect(body).to.deep.equal({
           message: 'Test message 5',

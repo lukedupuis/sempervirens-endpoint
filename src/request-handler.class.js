@@ -44,6 +44,11 @@ class RequestHandler {
     if (this.#hasError || this.res.headersSent) return;
     this.#hasError = true;
 
+    if (error.message.includes('USER_ERROR:')) {
+      code = ErrorCodes.USER_ERROR;
+      error.message = error.message.replace('USER_ERROR:', '').trim();
+    }
+
     let sendMessage = false;
     if (code == ErrorCodes.USER_ERROR) {
       sendMessage = true;

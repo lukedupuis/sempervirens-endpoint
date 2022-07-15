@@ -38,7 +38,7 @@ class RequestHandler {
     error = null,
     code = ErrorCodes.SCRIPT_ERROR,
     suppressLog = false,
-    status = 200
+    status = 500
   }) {
 
     if (this.#hasError || this.res.headersSent) return;
@@ -53,6 +53,7 @@ class RequestHandler {
     if (code == ErrorCodes.USER_ERROR) {
       sendMessage = true;
       suppressLog = true;
+      status = 200;
     }
 
     if (!suppressLog) console.error(timestamp(), number, error);

@@ -134,18 +134,17 @@ describe('1. Endpoint', () => {
     describe('1.2.3. When a response is returned with the RequestHandler error function', () => {
       // return;
 
-      describe('1.2.3.1 When "number" and "message" are specified, and "code" is not specified', () => {
+      describe('1.2.3.1. When "number" and "message" are specified, and "code" is not specified', () => {
         // return;
         it('1.2.3.1.1 Should return a standardized JSON object as "body" with a generic error message', async () => {
           console.error = () => null;
-          const { body } = await superagent.get('http://localhost:8080/api/test-3');
-          expect(body).to.deep.equal({
-            error: {
-              number: 104020,
-              code: 'SCRIPT_ERROR',
-              message: 'Server error'
-            }
-          });
+          try {
+            await superagent.get('http://localhost:8080/api/test-3')
+          } catch({ status, response: { text } }) {
+            expect(status).to.equal(500);
+            expect(text).to.include('"code":"SCRIPT_ERROR"')
+            expect(text).to.include('"message":"Server error"');
+          }
         });
       });
 

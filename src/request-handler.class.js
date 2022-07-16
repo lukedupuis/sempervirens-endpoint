@@ -30,10 +30,10 @@ class RequestHandler {
   }
 
   send({
-    message = '',
+    message = 'Success',
     data = {}
   } = {
-    message: '',
+    message: 'Success',
     data: {}
   }) {
     if (this.#hasError || this.res.headersSent) return;

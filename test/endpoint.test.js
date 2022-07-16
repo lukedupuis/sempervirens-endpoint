@@ -13,8 +13,8 @@ const jwtPrivateKey = readFileSync('./security/jwt/jwtRS256.key', 'utf8');
 authorizer.init({ jwtPublicKey, jwtPrivateKey });
 
 class Test1RequestHandler extends RequestHandler {
-  constructor({ req, res, isSecure }) {
-    super({ req, res, isSecure });
+  constructor({ req, res, data, isSecure }) {
+    super({ req, res, data, isSecure });
     this.#init();
   }
   #init() {
@@ -22,8 +22,8 @@ class Test1RequestHandler extends RequestHandler {
   }
 }
 class Test2RequestHandler extends RequestHandler {
-  constructor({ req, res, isSecure }) {
-    super({ req, res, isSecure });
+  constructor({ req, res, data, isSecure }) {
+    super({ req, res, data, isSecure });
     this.#init();
   }
   #init() {
@@ -34,38 +34,47 @@ class Test2RequestHandler extends RequestHandler {
   }
 }
 class Test3RequestHandler extends RequestHandler {
-  constructor({ req, res, isSecure }) {
-    super({ req, res, isSecure });
+  constructor({ req, res, data, isSecure }) {
+    super({ req, res, data, isSecure });
+    this.#init();
+  }
+  #init() {
+    this.send();
+  }
+}
+class Test4RequestHandler extends RequestHandler {
+  constructor({ req, res, data, isSecure }) {
+    super({ req, res, data, isSecure });
     this.#init();
   }
   #init() {
     this.error({
       number: 104020,
-      error: new Error('Test 3 error')
+      error: new Error('Test 4 error')
     });
   }
 }
-class Test4RequestHandler extends RequestHandler {
-  constructor({ req, res, isSecure }) {
-    super({ req, res, isSecure });
+class Test5RequestHandler extends RequestHandler {
+  constructor({ req, res, data, isSecure }) {
+    super({ req, res, data, isSecure });
     this.#init();
   }
   #init() {
     this.error({
       number: 345673,
-      error: new Error('Test 4 error'),
+      error: new Error('Test 5 error'),
       code: ErrorCodes.USER_ERROR
     });
   }
 }
-class Test5RequestHandler extends RequestHandler {
-  constructor({ req, res, isSecure }) {
-    super({ req, res, isSecure });
+class Test6RequestHandler extends RequestHandler {
+  constructor({ req, res, data, isSecure }) {
+    super({ req, res, data, isSecure });
     this.#init();
   }
   #init() {
     this.send({
-      message: 'Test message 5',
+      message: 'Test message 6',
       data: { prop1: 'val1', prop2: 'val2' }
    });
   }
@@ -90,9 +99,13 @@ const endpoints = [
   },
   {
     path: 'GET /api/test-5',
-    handler: Test5RequestHandler,
+    handler: Test5RequestHandler
+  },
+  {
+    path: 'GET /api/test-6',
+    handler: Test6RequestHandler,
     isSecure: true
-  }
+  },
 ];
 
 const app = express();
@@ -129,6 +142,15 @@ describe('1. Endpoint', () => {
         expect(data).to.deep.equal({ prop1: 'val1', prop2: 'val2' });
         expect(error).to.be.undefined;
       });
+
+      describe('1.2.2.1. When "send" is called without any parameters', () => {
+        it('1.2.2.1.1. Should send a standardized response', async () => {
+          const { body: { message, data, error } } = await superagent.get('http://localhost:8080/api/test-3');
+          expect(message).to.equal('Success');
+          expect(data).to.deep.equal({});
+          expect(error).to.be.undefined;
+        });
+      });
     });
 
     describe('1.2.3. When a response is returned with the RequestHandler error function', () => {
@@ -139,7 +161,7 @@ describe('1. Endpoint', () => {
         it('1.2.3.1.1 Should return a standardized JSON object as "body" with a generic error message', async () => {
           console.error = () => null;
           try {
-            await superagent.get('http://localhost:8080/api/test-3')
+            await superagent.get('http://localhost:8080/api/test-4')
           } catch({ status, response: { text } }) {
             expect(status).to.equal(500);
             expect(text).to.include('"code":"SCRIPT_ERROR"')
@@ -152,13 +174,13 @@ describe('1. Endpoint', () => {
         // return;
         it('1.2.3.2.1 Should return standardized JSON object as "body" with the error message', async () => {
           console.error = () => null;
-          const { body } = await superagent.get('http://localhost:8080/api/test-4');
+          const { body } = await superagent.get('http://localhost:8080/api/test-5');
           expect(true).to.be.true;
           expect(body).to.deep.equal({
             error: {
               number: 345673,
               code: 'USER_ERROR',
-              message: 'Test 4 error'
+              message: 'Test 5 error'
             }
           });
         });
@@ -175,7 +197,7 @@ describe('1. Endpoint', () => {
       // return;
       it('1.3.1.1. Should return 401 Unauthorized response', async () => {
         try {
-          await superagent.get('http://localhost:8080/api/test-5');
+          await superagent.get('http://localhost:8080/api/test-6');
         } catch({ status, message }) {
           expect(status).to.equal(401);
           expect(message).to.equal('Unauthorized');
@@ -188,7 +210,7 @@ describe('1. Endpoint', () => {
       it('1.3.2.1. Should return 401 Unauthorized response', async () => {
         try {
           await superagent
-            .get('http://localhost:8080/api/test-5')
+            .get('http://localhost:8080/api/test-6')
             .set('Authorization', 'Bearer token');
         } catch({ status, message }) {
           expect(status).to.equal(401);
@@ -202,10 +224,10 @@ describe('1. Endpoint', () => {
       it('1.3.3.1. Should return a standardized JSON object as "body"', async () => {
         const token = authorizer.encryptJwt({ expiresIn: '1m', data: { test: 1 } });
         const { body } = await superagent
-          .get('http://localhost:8080/api/test-5')
+          .get('http://localhost:8080/api/test-6')
           .set('Authorization', `Bearer ${token}`);
         expect(body).to.deep.equal({
-          message: 'Test message 5',
+          message: 'Test message 6',
           data: { prop1: 'val1', prop2: 'val2' }
         });
       });

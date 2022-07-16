@@ -1,6 +1,7 @@
 const registerEndpoints = ({
   app,
-  endpoints
+  endpoints = [],
+  siteData = {}
 }) => {
   endpoints.forEach(endpoint => {
     const { handler, isSecure } = endpoint;
@@ -10,9 +11,9 @@ const registerEndpoints = ({
       if (req.isSite === false) {
         next();
       } else if (handler.toString().substring(0, 5) == 'class') {
-        new handler({ req, res, isSecure });
+        new handler({ req, res, isSecure, siteData });
       } else {
-        handler({ req, res, isSecure });
+        handler({ req, res, isSecure, siteData });
       }
     });
   });

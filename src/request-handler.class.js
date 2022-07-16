@@ -8,18 +8,18 @@ class RequestHandler {
   #hasError;
   req;
   res;
-  siteData;
+  data;
 
   constructor({
     req,
     res,
-    siteData = {},
+    data = {},
     isSecure = false
   }) {
     this.#hasError = false;
     this.req = req;
     this.res = res;
-    this.siteData = siteData;
+    this.data = data;
     isSecure && this.#authorize();
   }
 

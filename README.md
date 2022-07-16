@@ -122,7 +122,7 @@ http.createServer(app).listen(80, () => console.log('Listening'));
 
 | Prop  | Type | Params | Description |
 |-------|------|--------|-------------|
-| `registerEndpoints` | function | `app: Express app, endpoints: { path: string, handler: RequestHandler, siteData: object, isSecure: boolean }` | Registers the endpoints on the Express app. |
+| `registerEndpoints` | function | `app: Express app, endpoints: { path: string, handler: RequestHandler, data: object, isSecure: boolean }` | Registers the endpoints on the Express app. |
 
 ### ErrorCodes (enum)
 
@@ -134,6 +134,6 @@ http.createServer(app).listen(80, () => console.log('Listening'));
 ### RequestHandler (class)
 | Prop  | Type | Params | Description |
 |-------|------|--------|-------------|
-| `constructor` | function | `{ req: Express request, res: Express response, siteData: {}, isSecure: boolean }` | The main entry point that is called when the Express route is invoked. If `siteData` is given, it provides the data to all instances. |
+| `constructor` | function | `{ req: Express request, res: Express response, data: {}, isSecure: boolean }` | The main entry point that is called when the Express route is invoked. If `data` is given, it provides the data to all instances. |
 | `send` | function | `{ message: string, data: object }` | Sends a standardized response to the client with a `message` and `data` object. It only sends if an error has not occurred and if a message has not already been sent. |
 | `error` | function | `{ number: number, error: Error, code: ErrorCodes, suppressLog: boolean, status: number }` | Sends a standardized `error` object to the client. Typically only `number` and `error` are needed. If `code` is `USER_ERROR`, then it sends the message for the given `error`; otherwise, it sends a generic `Server error` message. It also logs to the server console, which provides server-side logging. Status may also be specified, but usally a soft `200` with an `error` object is sufficient so as not to throw a hard HTTP error in the browser console. |

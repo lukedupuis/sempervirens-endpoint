@@ -10,11 +10,11 @@ Middleware for handling Express routes, it provides an organized way to register
 
 ## Usage
 
-The following steps provide minimal usage. It is recommneded to have separate files for each `RequestHandler` instance, and a separate `endpoints` file that imports the `RequestHandler` instances and exports an array of endpoint configurations. Also, while `@sempervirens/endpoint` may be used independently, implementation is integrated and streamlined in `@sempervirens/server`.
+The following steps provide minimal usage. It is recommneded to have separate files for each `RequestHandler` instance, and a separate `endpoints` file that imports the `RequestHandler` instances and exports an array of endpoint configurations. Also, while `@sempervirens/endpoint` may be used independently, or in conjunction with <a href="https://www.npmjs.com/package/@sempervirens/site-loader">`@sempervirens/site-loader`</a>, implementation of both is integrated and streamlined in <a href="https://www.npmjs.com/package/@sempervirens/server">`@sempervirens/server`</a>.
 
 ### Non-secure Endpoints
 
-1. Import `express` and Node `http` (or use `@sempervirens/server`).
+1. Import `express` and Node `http` (or use <a href="https://www.npmjs.com/package/@sempervirens/server">`@sempervirens/server`</a>).
 
 2. Import `registerEndpoints` and `RequestHandler` from `@sempervirens/endpoint`.
 
@@ -36,11 +36,13 @@ import { registerEndpoints, RequestHandler } from '@sempervirens/endpoint';
 
 // Recommended usage, in a separate file
 class TestRequestHandler extends RequestHandler {
-  constructor({ req, res, isSecure }) {
-    super({ req, res, isSecure });
+  constructor({ req, res, data, isSecure }) {
+    super({ req, res, data, isSecure });'
     this.#init();
   }
   #init() {
+    console.log(this.data);
+    // -> { prop1: 'val1' }
     this.res.send('Success');
   }
 }
@@ -50,6 +52,7 @@ const endpoints = [
   {
     path: 'GET /api/test',
     handler: TestRequestHandler
+    data: { prop1: 'val1' } // Passed into RequestHandler constructor
   }
 ];
 
@@ -60,13 +63,13 @@ http.createServer(app).listen(80, () => console.log('Listening'));
 
 ### Secure Endpoints
 
-Passing `isSecure` to the endpoint configuration secures the endpoint by requiring a `Authorization Bearer ${token}` header to be passed in the request. See `@sempervirens/authorizer` or `@sempervirens/server` for details.
+Passing `isSecure` to the endpoint configuration secures the endpoint by requiring a `Authorization Bearer ${token}` header to be passed in the request. See <a href="https://www.npmjs.com/package/@sempervirens/authorizer">`@sempervirens/authorizer`</a> or <a href="https://www.npmjs.com/package/@sempervirens/server">`@sempervirens/server`</a> for details.
 
 1. Import `express` and Node `http`.
 
 2. Import `registerEndpoints` and `RequestHandler` from `@sempervirens/endpoint`.
 
-3. Import `@sempervirens/authorizer`.
+3. Import <a href="https://www.npmjs.com/package/@sempervirens/authorizer">`@sempervirens/authorizer`</a>.
 
 4. Initialize `authorizer`;
 
@@ -93,8 +96,8 @@ authorizer.init({ jwtPublicKey, jwtPrivateKey });
 
 // Recommended usage, in a separate file
 class TestRequestHandler extends RequestHandler {
-  constructor({ req, res, isSecure }) {
-    super({ req, res, isSecure });
+  constructor({ req, res, data, isSecure }) {
+    super({ req, res, data, isSecure });
     this.#init();
   }
   #init() {
@@ -134,6 +137,6 @@ http.createServer(app).listen(80, () => console.log('Listening'));
 ### RequestHandler (class)
 | Prop  | Type | Params | Description |
 |-------|------|--------|-------------|
-| `constructor` | function | `{ req: Express request, res: Express response, data: {}, isSecure: boolean }` | The main entry point that is called when the Express route is invoked. If `data` is given, it provides the data to all instances. |
+| `constructor` | function | `{ req: Express request, res: Express response, data: {}, isSecure: boolean }` | The main entry point that is called when the Express route is invoked. If `data` is given, it provides the data to all instances as `this.data`, and if the `RequestHandler` is of a `SiteLoader` instance, both `data` parameters are merged with the `RequestHandler` set taking precedence if they have any of the same properties. |
 | `send` | function | `{ message: string, data: object }` | Sends a standardized response to the client with a `message` and `data` object. It only sends if an error has not occurred and if a message has not already been sent. |
-| `error` | function | `{ number: number, error: Error, code: ErrorCodes, suppressLog: boolean, status: number }` | Sends a standardized `error` object to the client. Typically only `number` and `error` are needed. If `code` is `USER_ERROR`, then it sends the message for the given `error`; otherwise, it sends a generic `Server error` message. It also logs to the server console, which provides server-side logging. Status may also be specified, but usally a soft `200` with an `error` object is sufficient so as not to throw a hard HTTP error in the browser console. |
+| `error` | function | `{ number: number, error: Error, code: ErrorCodes, suppressLog: boolean, status: number }` | Sends a standardized `error` object to the client. Typically only `number` and `error` are needed. If `code` is `USER_ERROR`, then it sends the message for the given `error`; otherwise, it sends a generic `Server error` message. It also logs to the server console, which provides server-side logging. Status may also be specified, but usally a soft `200` with an `error` object is sufficient so as not to throw a hard HTTP error in the browser console. |part

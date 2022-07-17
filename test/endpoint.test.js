@@ -27,10 +27,7 @@ class Test2RequestHandler extends RequestHandler {
     this.#init();
   }
   #init() {
-    this.send({
-      message: 'Test 2 message',
-      data: { prop1: 'val1', prop2: 'val2' }
-    });
+    this.res.json(this.data);
   }
 }
 class Test3RequestHandler extends RequestHandler {
@@ -39,7 +36,10 @@ class Test3RequestHandler extends RequestHandler {
     this.#init();
   }
   #init() {
-    this.send();
+    this.send({
+      message: 'Test 3 message',
+      data: { prop1: 'val1', prop2: 'val2' }
+    });
   }
 }
 class Test4RequestHandler extends RequestHandler {
@@ -48,10 +48,7 @@ class Test4RequestHandler extends RequestHandler {
     this.#init();
   }
   #init() {
-    this.error({
-      number: 104020,
-      error: new Error('Test 4 error')
-    });
+    this.send();
   }
 }
 class Test5RequestHandler extends RequestHandler {
@@ -61,9 +58,8 @@ class Test5RequestHandler extends RequestHandler {
   }
   #init() {
     this.error({
-      number: 345673,
-      error: new Error('Test 5 error'),
-      code: ErrorCodes.USER_ERROR
+      number: 104020,
+      error: new Error('Test 6 error')
     });
   }
 }
@@ -73,8 +69,21 @@ class Test6RequestHandler extends RequestHandler {
     this.#init();
   }
   #init() {
+    this.error({
+      number: 345673,
+      error: new Error('Test 6 error'),
+      code: ErrorCodes.USER_ERROR
+    });
+  }
+}
+class Test7RequestHandler extends RequestHandler {
+  constructor({ req, res, data, isSecure }) {
+    super({ req, res, data, isSecure });
+    this.#init();
+  }
+  #init() {
     this.send({
-      message: 'Test message 6',
+      message: 'Test message 7',
       data: { prop1: 'val1', prop2: 'val2' }
    });
   }
@@ -86,8 +95,9 @@ const endpoints = [
     handler: Test1RequestHandler
   },
   {
-    path: 'GET /api/test-2',
-    handler: Test2RequestHandler
+    path: 'GET api/test-2',
+    handler: Test2RequestHandler,
+    data: { prop1: 'val1' }
   },
   {
     path: 'GET /api/test-3',
@@ -103,7 +113,11 @@ const endpoints = [
   },
   {
     path: 'GET /api/test-6',
-    handler: Test6RequestHandler,
+    handler: Test6RequestHandler
+  },
+  {
+    path: 'GET /api/test-7',
+    handler: Test7RequestHandler,
     isSecure: true
   },
 ];
@@ -115,11 +129,20 @@ describe('1. Endpoint', () => {
 
   describe('1.1. When "registerEndpoints" is called', () => {
     // return;
+
+    registerEndpoints({ app, endpoints });
+    http.createServer(app).listen(8080);
+
     it('1.1.1. Should register the endpoints on the Express app', async () => {
-      registerEndpoints({ app, endpoints });
-      http.createServer(app).listen(8080);
       const { text } = await superagent.get('http://localhost:8080/api/test-1');
       expect(text).to.equal('Success');
+    });
+
+    describe('1.1.2. When "data" is passed in the endpoint', () => {
+      it('1.1.2.1. Should make the data available to the request handler', async () => {
+        const { body } = await superagent.get('http://localhost:8080/api/test-2');
+        expect(body).to.deep.equal({ prop1: 'val1' });
+      });
     });
   });
 
@@ -137,15 +160,15 @@ describe('1. Endpoint', () => {
     describe('1.2.2. When a response is returned with the RequestHandler send function', () => {
       // return;
       it('1.2.2.1. Should take "message" and "data" and return a standardized JSON object as "body"', async () => {
-        const { body: { message, data, error } } = await superagent.get('http://localhost:8080/api/test-2');
-        expect(message).to.equal('Test 2 message');
+        const { body: { message, data, error } } = await superagent.get('http://localhost:8080/api/test-3');
+        expect(message).to.equal('Test 3 message');
         expect(data).to.deep.equal({ prop1: 'val1', prop2: 'val2' });
         expect(error).to.be.undefined;
       });
 
       describe('1.2.2.1. When "send" is called without any parameters', () => {
         it('1.2.2.1.1. Should send a standardized response', async () => {
-          const { body: { message, data, error } } = await superagent.get('http://localhost:8080/api/test-3');
+          const { body: { message, data, error } } = await superagent.get('http://localhost:8080/api/test-4');
           expect(message).to.equal('Success');
           expect(data).to.deep.equal({});
           expect(error).to.be.undefined;
@@ -161,7 +184,7 @@ describe('1. Endpoint', () => {
         it('1.2.3.1.1 Should return a standardized JSON object as "body" with a generic error message', async () => {
           console.error = () => null;
           try {
-            await superagent.get('http://localhost:8080/api/test-4')
+            await superagent.get('http://localhost:8080/api/test-5')
           } catch({ status, response: { text } }) {
             expect(status).to.equal(500);
             expect(text).to.include('"code":"SCRIPT_ERROR"')
@@ -174,13 +197,13 @@ describe('1. Endpoint', () => {
         // return;
         it('1.2.3.2.1 Should return standardized JSON object as "body" with the error message', async () => {
           console.error = () => null;
-          const { body } = await superagent.get('http://localhost:8080/api/test-5');
+          const { body } = await superagent.get('http://localhost:8080/api/test-6');
           expect(true).to.be.true;
           expect(body).to.deep.equal({
             error: {
               number: 345673,
               code: 'USER_ERROR',
-              message: 'Test 5 error'
+              message: 'Test 6 error'
             }
           });
         });
@@ -197,7 +220,7 @@ describe('1. Endpoint', () => {
       // return;
       it('1.3.1.1. Should return 401 Unauthorized response', async () => {
         try {
-          await superagent.get('http://localhost:8080/api/test-6');
+          await superagent.get('http://localhost:8080/api/test-7');
         } catch({ status, message }) {
           expect(status).to.equal(401);
           expect(message).to.equal('Unauthorized');
@@ -210,7 +233,7 @@ describe('1. Endpoint', () => {
       it('1.3.2.1. Should return 401 Unauthorized response', async () => {
         try {
           await superagent
-            .get('http://localhost:8080/api/test-6')
+            .get('http://localhost:8080/api/test-7')
             .set('Authorization', 'Bearer token');
         } catch({ status, message }) {
           expect(status).to.equal(401);
@@ -224,10 +247,10 @@ describe('1. Endpoint', () => {
       it('1.3.3.1. Should return a standardized JSON object as "body"', async () => {
         const token = authorizer.encryptJwt({ expiresIn: '1m', data: { test: 1 } });
         const { body } = await superagent
-          .get('http://localhost:8080/api/test-6')
+          .get('http://localhost:8080/api/test-7')
           .set('Authorization', `Bearer ${token}`);
         expect(body).to.deep.equal({
-          message: 'Test message 6',
+          message: 'Test message 7',
           data: { prop1: 'val1', prop2: 'val2' }
         });
       });

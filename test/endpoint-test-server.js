@@ -5,8 +5,8 @@ import { registerEndpoints, RequestHandler } from '../index.js';
 
 // Recommended usage
 class Test1RequestHandler extends RequestHandler {
-  constructor({ req, res, isSecure }) {
-    super({ req, res, isSecure });
+  constructor({ req, res, data, isSecure }) {
+    super({ req, res, data, isSecure });
     this.#init();
   }
   #init() {
@@ -17,7 +17,8 @@ class Test1RequestHandler extends RequestHandler {
 const endpoints = [
   {
     path: 'GET /api/test-1',
-    handler: Test1RequestHandler
+    handler: Test1RequestHandler,
+    data: { prop1: 'val1' }
   }
 ];
 

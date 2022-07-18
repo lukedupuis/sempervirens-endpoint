@@ -29,8 +29,8 @@
     "superagent": "^7.1.6"
   },
   "dependencies": {
-    "@sempervirens/authorizer": "^0.0.1",
-    "@sempervirens/dao": "^0.1.1",
-    "@sempervirens/tools": "^0.2.1"
+    "@sempervirens/authorizer": "^0.5.0",
+    "@sempervirens/dao": "^0.2.2",
+    "@sempervirens/tools": "^0.3.1"
   }
 }

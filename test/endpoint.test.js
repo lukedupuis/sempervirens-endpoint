@@ -245,7 +245,7 @@ describe('1. Endpoint', () => {
     describe('1.3.3. When an invalid authorization token is provided', () => {
       // return;
       it('1.3.3.1. Should return a standardized JSON object as "body"', async () => {
-        const token = authorizer.encryptJwt({ expiresIn: '1m', data: { test: 1 } });
+        const token = authorizer.encrypt({ expiresIn: '1m', data: { test: 1 } });
         const { body } = await superagent
           .get('http://localhost:8080/api/test-7')
           .set('Authorization', `Bearer ${token}`);

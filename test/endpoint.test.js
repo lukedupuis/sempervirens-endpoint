@@ -12,6 +12,8 @@ const jwtPrivateKey = readFileSync('./security/jwt/jwtRS256.key', 'utf8');
 
 authorizer.init({ jwtPublicKey, jwtPrivateKey });
 
+let performedAction = false;
+
 class Test1RequestHandler extends RequestHandler {
   constructor({ req, res, data, isSecure }) {
     super({ req, res, data, isSecure });
@@ -79,9 +81,11 @@ class Test6RequestHandler extends RequestHandler {
 class Test7RequestHandler extends RequestHandler {
   constructor({ req, res, data, isSecure }) {
     super({ req, res, data, isSecure });
+    if (!this.isAuthorized) return;
     this.#init();
   }
   #init() {
+    performedAction = true;
     this.send({
       message: 'Test message 7',
       data: { prop1: 'val1', prop2: 'val2' }
@@ -226,6 +230,15 @@ describe('1. Endpoint', () => {
           expect(message).to.equal('Unauthorized');
         }
       });
+
+      it('1.3.1.2. Should not perform the endpoint action', async () => {
+        performedAction = false;
+        try {
+          await superagent.get('http://localhost:8080/api/test-7');
+        } catch({ status, message }) {
+          expect(performedAction).to.be.false;
+        }
+      });
     });
 
     describe('1.3.2. When an invalid authorization token is provided', () => {
@@ -240,9 +253,20 @@ describe('1. Endpoint', () => {
           expect(message).to.equal('Unauthorized');
         }
       });
+
+      it('1.3.2.2. Should not perform the endpoint action', async () => {
+        performedAction = false;
+        try {
+          await superagent
+            .get('http://localhost:8080/api/test-7')
+            .set('Authorization', 'Bearer token');
+        } catch({ status, message }) {
+          expect(performedAction).to.be.false;
+        }
+      });
     });
 
-    describe('1.3.3. When an invalid authorization token is provided', () => {
+    describe('1.3.3. When a valid authorization token is provided', () => {
       // return;
       it('1.3.3.1. Should return a standardized JSON object as "body"', async () => {
         const token = authorizer.encrypt({ expiresIn: '1m', data: { test: 1 } });

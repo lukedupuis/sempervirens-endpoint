@@ -37,7 +37,8 @@ import { registerEndpoints, RequestHandler } from '@sempervirens/endpoint';
 // Recommended usage, in a separate file
 class TestRequestHandler extends RequestHandler {
   constructor({ req, res, data, isSecure }) {
-    super({ req, res, data, isSecure });'
+    super({ req, res, data, isSecure });
+    if (!this.isAuthorized) return;
     this.#init();
   }
   #init() {
@@ -98,6 +99,7 @@ authorizer.init({ jwtPublicKey, jwtPrivateKey });
 class TestRequestHandler extends RequestHandler {
   constructor({ req, res, data, isSecure }) {
     super({ req, res, data, isSecure });
+    if (!this.isAuthorized) return;
     this.#init();
   }
   #init() {

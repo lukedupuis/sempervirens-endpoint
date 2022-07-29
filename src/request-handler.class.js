@@ -9,6 +9,7 @@ class RequestHandler {
   req;
   res;
   data;
+  isAuthorized = true;
 
   constructor({
     req,
@@ -25,6 +26,7 @@ class RequestHandler {
 
   #authorize() {
     if (!authorizer.isAuthorized(this.req)) {
+      this.isAuthorized = false;
       authorizer.sendUnauthorized(this.res);
     }
   }

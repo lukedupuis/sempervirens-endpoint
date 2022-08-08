@@ -24,7 +24,7 @@
   "homepage": "https://github.com/lukedupuis/sempervirens-endpoint#readme",
   "dependencies": {
     "@sempervirens/authorizer": "^0.5.0",
-    "@sempervirens/dao": "^0.2.2",
+    "@sempervirens/dao": "^0.3.0",
     "@sempervirens/tools": "^0.4.0"
   },
   "devDependencies": {
